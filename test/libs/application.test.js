@@ -1,17 +1,18 @@
-let App = require('../../libs/Application');
+// let Spider = require('../../libs/Application').Spider;
 
-let app = new App();
-let Spider = app.Spider;
+// let app = new App();
 
-let baiduSpider = new Spider();
-baiduSpider.addRequest('http://www.codeceo.com/article/tag/java');
-baiduSpider.use(function (response) {
-    baiduSpider.addRequest('http://www.codeceo.com/article/tag/java');
-});
-
-app.addSpider(baiduSpider);
-
-app.run();
+// let Spider = app.Spider;
+//
+// let baiduSpider = new Spider();
+// baiduSpider.addRequest('http://www.codeceo.com/article/tag/java');
+// baiduSpider.use(function (response) {
+//     baiduSpider.addRequest('http://www.codeceo.com/article/tag/java');
+// });
+//
+// app.addSpider(baiduSpider);
+//
+// app.run();
 
 
 
