@@ -1,18 +1,16 @@
-// let Spider = require('../../libs/Application').Spider;
+let Gentm = require('../../libs/Application');
+let {Spider} = Gentm;
+let app = new Gentm();
+let HomeSpider = new Spider();
+function parseBaiDu(response){
 
-// let app = new App();
+}
 
-// let Spider = app.Spider;
-//
-// let baiduSpider = new Spider();
-// baiduSpider.addRequest('http://www.codeceo.com/article/tag/java');
-// baiduSpider.use(function (response) {
-//     baiduSpider.addRequest('http://www.codeceo.com/article/tag/java');
-// });
-//
-// app.addSpider(baiduSpider);
-//
-// app.run();
+HomeSpider.addRequest('http://www.baidu.com',parseBaiDu);
+
+app.addSpider(HomeSpider);
+app.run();
+
 
 
 

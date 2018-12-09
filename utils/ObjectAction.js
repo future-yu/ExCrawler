@@ -1,3 +1,4 @@
+const Utils = require('./Utils');
 class ObjectAction {
     static shallowCopy(rawObj) {
         return Object.assign({}, rawObj);
@@ -6,7 +7,7 @@ class ObjectAction {
     static mergeSame(originObj,targetObj){
         for (let attr in targetObj){
             if(originObj[attr]){
-                if(this.getType(originObj[attr])=='Object'&&this.getType(targetObj[attr])=='Object'){
+                if(Utils.getType(originObj[attr])=='Object'&&Utils.getType(targetObj[attr])=='Object'){
                     this.mergeSame(originObj[attr],targetObj[attr])
                 }else{
                     originObj[attr] = targetObj[attr];

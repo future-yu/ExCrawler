@@ -45,6 +45,8 @@ class Utils {
                 return 'Undefined';
             case "[object Symbol]":
                 return 'Symbol';
+            case "[object Function]":
+                return 'Function';
 
         }
     }
@@ -53,5 +55,4 @@ class Utils {
         return /(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/ig.test(url);
     }
 }
-
 module.exports = Utils;

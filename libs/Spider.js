@@ -5,7 +5,6 @@ const ObjectAction = require('../utils/ObjectAction');
 class Spider extends Events {
     constructor(config={}) {
         super();
-        this.middlewares = [];
         this.retryTimes = 3;
         this.urls = [];
         let _config = {
@@ -16,7 +15,6 @@ class Spider extends Events {
             gzip: true
         };
 
-        config = config||{};
         if(Utils.getType(config) !=='Object'){
             this.emit('error','参数必须是纯Object类型-->{xxx:xxx}');
         }
@@ -31,33 +29,61 @@ class Spider extends Events {
     }
 
     //产生URL对象
-    _RequestFactory(url,config){
+    _RequestFactory(url,parse,config){
         let allRequest=[];
         if(Utils.getType(url)=='String'){
+            let reqObj = {};
             let config_req = ObjectAction.mergeSame(this._getDefaultConfig(),config);
             config_req.url = url;
-            config_req.times=0;
-            allRequest.push(config_req);
+            reqObj.times=0;
+            reqObj.parse = parse;
+            reqObj.config_req = config_req;
+            allRequest.push(reqObj);
         }
         if(Utils.getType(url)=='Array'){
             url.forEach((item)=>{
+                let reqObj = {};
                 let config_req = ObjectAction.mergeSame(this._getDefaultConfig(),config);
                 config_req.url = item;
-                config_req.times=0;
-                allRequest.push(config_req);
+                reqObj.times=0;
+                reqObj.parse = parse;
+                reqObj.config_req = config_req;
+                allRequest.push(reqObj);
             });
         }
         return allRequest;
     }
 
     //添加请求
-    addRequest(url,config={}) {
+    addRequest(url,parse,config={}) {
         let _this = this;
         //判定是否为空
         if(!url){
             return;
         }
+        //判断解析函数
+        if(!parse){
+            return;
+        }
+        let allParse = [];
+        //判断parse类型
+        switch (Utils.getType(parse)) {
+            case 'Function':
+                allParse.push(parse);
+                break;
+            case 'Array':
+                parse.forEach((item)=>{
+                    if(Utils.getType(item)!=='Function'){
+                        _this.emit('error','解析数组内只能是Function类型');
+                    }
+                });
+                allParse = parse;
+                break;
+            default:
+                _this.emit('error','解析参数只能是Function或含Function的数组');
+        }
 
+        //判断url类型
         switch (Utils.getType(url)) {
             case 'String':
                 if(!Utils.isUrl(url)){
@@ -75,18 +101,15 @@ class Spider extends Events {
                 _this.emit('error','url只允许是String或Array类型');
         }
 
+        //判断config类型
         if (Utils.getType(config)!=='Object'){
             this.emit('error','addRequest的第二个参数config格式错误');
         }
-        this.urls = this._RequestFactory(url,config).concat(this.urls);
+        this.urls = this._RequestFactory(url,allParse,config).concat(this.urls);
     }
 
     changeConfig(config) {
         this.retryTimes = config.retryTimes;
-    }
-
-    use(fn) {
-        this.middlewares.push(fn);
     }
 
     _request(config) {
@@ -95,7 +118,7 @@ class Spider extends Events {
                 if (err) {
                     reject(err);
                 }
-                resolve(response)
+                resolve(response);
             })
         })
     }
@@ -118,11 +141,11 @@ class Spider extends Events {
     _exRequest(_this) {
         let reqCon = _this.urls.pop();
         let time = reqCon.times;
-        _this._request(reqCon).then((res) => {
+        _this._request(reqCon.config_req).then((res) => {
             if (res.statusCode > 399) {
                 _this.emit('error', res);
             } else {
-                Utils.pipeline(_this.middlewares)(res);
+                Utils.pipeline(reqCon.parse)(res);
             }
         }).catch((e) => {
             if (time < 3) {
